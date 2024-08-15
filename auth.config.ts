@@ -1,4 +1,4 @@
-import type { NextAuthConfig } from 'next-auth'
+import { NextAuthConfig } from 'next-auth'
 
 export const authConfig = {
   secret: process.env.AUTH_SECRET,

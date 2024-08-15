@@ -1,15 +1,44 @@
-import NextAuth from 'next-auth'
+import NextAuth, { User } from 'next-auth'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import { eq } from 'drizzle-orm'
 import Credentials from 'next-auth/providers/credentials'
-import { authConfig } from './auth.config'
+import GithubProvider from 'next-auth/providers/github'
 import { z } from 'zod'
-import { getStringFromBuffer } from './lib/utils'
-import { getUser } from './app/login/actions'
 
-export const { auth, signIn, signOut } = NextAuth({
-  ...authConfig,
+import { db } from '@/lib/db'
+import { users } from './lib/db/schema/auth'
+
+function passwordToSalt(password: string) {
+  const bcrypt = require('bcryptjs')
+  const saltRounds = 10
+  const hash = bcrypt.hashSync(password, saltRounds)
+  return hash
+}
+
+async function getUser(email: string) {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email)
+  })
+  return user
+}
+
+async function addUserToDb(email: string, saltedPassword: string) {
+  const user = await db
+    .insert(users)
+    .values({
+      id: crypto.randomUUID(),
+      email: email,
+      password: saltedPassword
+    })
+    .returning()
+  return user.pop()
+}
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: DrizzleAdapter(db),
   providers: [
     Credentials({
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         const parsedCredentials = z
           .object({
             email: z.string().email(),
@@ -19,27 +48,43 @@ export const { auth, signIn, signOut } = NextAuth({
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data
-          const user = await getUser(email)
-
-          if (!user) return null
-
-          const encoder = new TextEncoder()
-          const saltedPassword = encoder.encode(password + user.salt)
-          const hashedPasswordBuffer = await crypto.subtle.digest(
-            'SHA-256',
-            saltedPassword
-          )
-          const hashedPassword = getStringFromBuffer(hashedPasswordBuffer)
-
-          if (hashedPassword === user.password) {
-            return user
+          let user = await getUser(email)
+          if (user) {
+            if (!user.password) return null
+            const bcrypt = require('bcryptjs')
+            const isAuthenticated = await bcrypt.compare(
+              password,
+              user.password
+            )
+            if (isAuthenticated) {
+              return user
+            } else {
+              return null
+            }
           } else {
-            return null
+            const saltedPassword = passwordToSalt(password)
+            user = await addUserToDb(email, saltedPassword)
+            if (!user) {
+              throw new Error('user was not found and could not be created.')
+            }
+            return user
           }
         }
 
         return null
       }
+    }),
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET
     })
-  ]
+  ],
+  callbacks: {
+    async session({ session }: any) {
+      return session
+    }
+  },
+  session: {
+    strategy: 'jwt'
+  }
 })
