@@ -29,6 +29,9 @@ const systemPrompt = `\
 async function submitUserMessage(content: string) {
   'use server'
 
+  const session = await auth()
+  const userId = session?.user?.id as string
+
   const aiState = getMutableAIState<typeof AI>()
 
   aiState.update({
@@ -62,7 +65,6 @@ async function submitUserMessage(content: string) {
         textStream = createStreamableValue('')
         textNode = <BotMessage content={textStream.value} />
       }
-
       if (done) {
         textStream.done()
         aiState.done({
@@ -100,7 +102,7 @@ async function submitUserMessage(content: string) {
 
           await createResource({
             content,
-            userId: '052e6c16-78ef-45dc-831c-5c230b429ed4'
+            userId
           })
 
           const toolCallId = nanoid()
@@ -156,10 +158,7 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          const relevantContent = await findRelevantContent(
-            question,
-            '052e6c16-78ef-45dc-831c-5c230b429ed4'
-          )
+          const relevantContent = await findRelevantContent(question, userId)
 
           const toolCallId = nanoid()
 
