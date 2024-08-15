@@ -17,7 +17,7 @@ import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
 import { createResource } from '../resources/actions'
 import { findRelevantContent } from '@/lib/ai/embedding'
-import { object, z } from 'zod'
+import { z } from 'zod'
 
 const systemPrompt = `\
     You are a helpful assistant. Check your knowledge base before answering any questions.
@@ -98,7 +98,10 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          await createResource({ content })
+          await createResource({
+            content,
+            userId: '052e6c16-78ef-45dc-831c-5c230b429ed4'
+          })
 
           const toolCallId = nanoid()
 
@@ -153,7 +156,10 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          const relevantContent = await findRelevantContent(question)
+          const relevantContent = await findRelevantContent(
+            question,
+            '052e6c16-78ef-45dc-831c-5c230b429ed4'
+          )
 
           const toolCallId = nanoid()
 

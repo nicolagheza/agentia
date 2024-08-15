@@ -1,6 +1,9 @@
 import { nanoid } from '@/lib/utils'
+import { createSelectSchema } from 'drizzle-zod'
 import { index, pgTable, text, varchar, vector } from 'drizzle-orm/pg-core'
 import { resources } from './resources'
+import { users } from './auth'
+import { z } from 'zod'
 
 export const embeddings = pgTable(
   'embeddings',
@@ -12,6 +15,9 @@ export const embeddings = pgTable(
       () => resources.id,
       { onDelete: 'cascade' }
     ),
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id),
     content: text('content').notNull(),
     embedding: vector('embedding', { dimensions: 1536 }).notNull()
   },

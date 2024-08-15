@@ -15,6 +15,13 @@
       "when": 1723728457211,
       "tag": "0001_light_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1723762212682,
+      "tag": "0002_perpetual_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }

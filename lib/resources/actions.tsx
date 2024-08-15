@@ -8,20 +8,30 @@ import {
 import { db } from '../db'
 import { generateEmbeddings } from '../ai/embedding'
 import { embeddings as embeddingsTable } from '../db/schema/embeddings'
+import { auth } from '@/auth'
 
 export const createResource = async (input: NewResourceParams) => {
   try {
-    const { content } = insertResourceSchema.parse(input)
+    const session = await auth()
+    if (!session) throw new Error('Unauthorized')
+    if (!session.user || !session.user.id)
+      throw new Error('User or UserId missing')
+
+    const { content, userId } = insertResourceSchema.parse({
+      ...input,
+      userId: session.user.id
+    })
 
     const [resource] = await db
       .insert(resources)
-      .values({ content })
+      .values({ content, userId })
       .returning()
 
     const embeddings = await generateEmbeddings(content)
     await db.insert(embeddingsTable).values(
       embeddings.map(embedding => ({
         resourceId: resource.id,
+        userId: userId,
         ...embedding
       }))
     )
