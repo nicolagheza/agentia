@@ -17,7 +17,7 @@ import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
 import { createResource } from '../resources/actions'
 import { findRelevantContent } from '@/lib/ai/embedding'
-import { object, z } from 'zod'
+import { z } from 'zod'
 
 const systemPrompt = `\
     You are a helpful assistant. Check your knowledge base before answering any questions.
@@ -28,6 +28,9 @@ const systemPrompt = `\
 
 async function submitUserMessage(content: string) {
   'use server'
+
+  const session = await auth()
+  const userId = session?.user?.id as string
 
   const aiState = getMutableAIState<typeof AI>()
 
@@ -62,7 +65,6 @@ async function submitUserMessage(content: string) {
         textStream = createStreamableValue('')
         textNode = <BotMessage content={textStream.value} />
       }
-
       if (done) {
         textStream.done()
         aiState.done({
@@ -98,7 +100,10 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          await createResource({ content })
+          await createResource({
+            content,
+            userId
+          })
 
           const toolCallId = nanoid()
 
@@ -153,7 +158,7 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          const relevantContent = await findRelevantContent(question)
+          const relevantContent = await findRelevantContent(question, userId)
 
           const toolCallId = nanoid()
 

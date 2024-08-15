@@ -15,7 +15,7 @@ function passwordToSalt(password: string) {
   return hash
 }
 
-async function getUser(email: string) {
+async function getUserFromDb(email: string) {
   const user = await db.query.users.findFirst({
     where: eq(users.email, email)
   })
@@ -48,7 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data
-          let user = await getUser(email)
+          let user = await getUserFromDb(email)
           if (user) {
             if (!user.password) return null
             const bcrypt = require('bcryptjs')
@@ -80,7 +80,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async session({ session }: any) {
+    async jwt({ token, user }) {
+      if (user) {
+        token = { ...token, id: user.id }
+      }
+
+      return token
+    },
+    async session({ session, token }) {
+      if (token) {
+        const { id } = token as { id: string }
+        const { user } = session
+
+        session = { ...session, user: { ...user, id } }
+      }
+
       return session
     }
   },

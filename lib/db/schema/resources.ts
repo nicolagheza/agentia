@@ -4,13 +4,16 @@ import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
 import { nanoid } from '@/lib/utils'
+import { users } from './auth'
 
 export const resources = pgTable('resources', {
   id: varchar('id', { length: 191 })
     .primaryKey()
     .$defaultFn(() => nanoid()),
   content: text('content').notNull(),
-
+  userId: text('userId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at')
     .notNull()
     .default(sql`now()`),
