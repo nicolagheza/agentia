@@ -80,6 +80,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
+    authorized: async ({ auth }) => {
+      return !!auth
+    },
     async jwt({ token, user }) {
       if (user) {
         token = { ...token, id: user.id }

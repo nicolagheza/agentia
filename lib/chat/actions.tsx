@@ -19,6 +19,8 @@ import { createResource } from '../resources/actions'
 import { findRelevantContent } from '@/lib/ai/embedding'
 import { z } from 'zod'
 
+export const maxDuration = 60
+
 const systemPrompt = `\
     You are a helpful assistant. Check your knowledge base before answering any questions.
     Only respond to questions using information from tool calls.

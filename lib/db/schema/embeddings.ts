@@ -1,9 +1,7 @@
 import { nanoid } from '@/lib/utils'
-import { createSelectSchema } from 'drizzle-zod'
 import { index, pgTable, text, varchar, vector } from 'drizzle-orm/pg-core'
 import { resources } from './resources'
 import { users } from './auth'
-import { z } from 'zod'
 
 export const embeddings = pgTable(
   'embeddings',
