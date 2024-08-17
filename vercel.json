@@ -8,7 +8,7 @@
     },
     "lib/chat/*.tsx": {
       "maxDuration": 60
-    },
+    }
   },
   "git": {
     "deploymentEnabled": {
