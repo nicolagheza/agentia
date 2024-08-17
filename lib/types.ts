@@ -39,3 +39,13 @@ export interface User extends Record<string, any> {
   password: string
   salt: string
 }
+
+export interface Resource extends Record<string, any> {
+  id: string
+  content: string
+
+  userId: string
+
+  createdAt: Date
+  updatedAt: Date
+}

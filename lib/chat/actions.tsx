@@ -10,14 +10,16 @@ import {
 import { openai } from '@ai-sdk/openai'
 import { BotCard, BotMessage } from '@/components/stocks'
 
-import { nanoid } from '@/lib/utils'
+import { nanoid, sleep } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
-import { createResource } from '../resources/actions'
+import { createResource, getUserResources } from '../resources/actions'
 import { findRelevantContent } from '@/lib/ai/embedding'
 import { z } from 'zod'
+import { EventsSkeleton } from '@/components/stocks/events-skeleton'
+import { ResourcesTable } from '@/components/resources/resources-table'
 
 export const maxDuration = 60
 
@@ -230,8 +232,67 @@ async function submitUserMessage(content: string) {
               return textNode
             }
           })
-
           return <BotCard>{textResult.value}</BotCard>
+        }
+      },
+      getUserResources: {
+        description: 'get all resources of the current user in your database.',
+        parameters: z.object({
+          noParam: z.number().optional().default(0)
+        }),
+        generate: async function* ({ noParam }) {
+          console.log('noParam', noParam)
+
+          yield (
+            <BotCard>
+              <EventsSkeleton />
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const userResources = await getUserResources()
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'getUserResources',
+                    toolCallId,
+                    args: { noParam }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'getUserResources',
+                    toolCallId,
+                    result: {
+                      response: 'Resources fetched'
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <ResourcesTable resources={userResources} />
+            </BotCard>
+          )
         }
       }
     }
