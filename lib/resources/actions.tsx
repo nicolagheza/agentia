@@ -4,7 +4,7 @@ import {
   resources
 } from '@/lib/db/schema/resources'
 import { db } from '../db'
-import { generateEmbeddings } from '../ai/embedding'
+import { generateEmbeddings } from '../embeddings/actions'
 import { embeddings as embeddingsTable } from '../db/schema/embeddings'
 import { auth } from '@/auth'
 import { eq } from 'drizzle-orm'

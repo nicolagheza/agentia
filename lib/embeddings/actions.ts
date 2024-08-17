@@ -50,5 +50,3 @@ export const findRelevantContent = async (
     .limit(4)
   return similarGuides
 }
-
-export const maxDuration = 60
