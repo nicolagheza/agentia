@@ -3,9 +3,12 @@
     "app/**/*": {
       "maxDuration": 60
     },
-    "lib/**/*": {
+    "lib/embeddings/*.ts": {
       "maxDuration": 60
-    }
+    },
+    "lib/chat/*.tsx": {
+      "maxDuration": 60
+    },
   },
   "git": {
     "deploymentEnabled": {
