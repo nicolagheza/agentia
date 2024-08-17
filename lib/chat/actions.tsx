@@ -249,8 +249,6 @@ async function submitUserMessage(content: string) {
             </BotCard>
           )
 
-          await sleep(1000)
-
           const userResources = await getUserResources()
 
           const toolCallId = nanoid()
@@ -279,9 +277,7 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'getUserResources',
                     toolCallId,
-                    result: {
-                      response: 'Resources fetched'
-                    }
+                    result: userResources
                   }
                 ]
               }

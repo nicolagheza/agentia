@@ -1,5 +1,3 @@
-'use server'
-
 import {
   NewResourceParams,
   insertResourceSchema,
@@ -85,3 +83,5 @@ export const deleteResource = async (id: string) => {
       : 'Error, please try again.'
   }
 }
+
+export const maxDuration = 60
