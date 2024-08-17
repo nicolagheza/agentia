@@ -18,8 +18,8 @@ import { auth } from '@/auth'
 import { createResource, getUserResources } from '../resources/actions'
 import { findRelevantContent } from '@/lib/ai/embedding'
 import { z } from 'zod'
-import { EventsSkeleton } from '@/components/stocks/events-skeleton'
 import { ResourcesTable } from '@/components/resources/resources-table'
+import { ResourcesTableSkeleton } from '@/components/resources/resources-table-skeleton'
 
 export const maxDuration = 60
 
@@ -245,7 +245,7 @@ async function submitUserMessage(content: string) {
 
           yield (
             <BotCard>
-              <EventsSkeleton />
+              <ResourcesTableSkeleton />
             </BotCard>
           )
 

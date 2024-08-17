@@ -8,6 +8,9 @@ dependencies:
   '@agentic/ai-sdk':
     specifier: ^7.0.0
     version: 7.0.0(@agentic/core@7.0.0)(ai@3.3.7)
+  '@agentic/exa':
+    specifier: ^7.0.0
+    version: 7.0.0(@agentic/core@7.0.0)(zod@3.23.8)
   '@ai-sdk/openai':
     specifier: ^0.0.45
     version: 0.0.45(zod@3.23.8)
@@ -261,6 +264,17 @@ packages:
       zod-validation-error: 3.3.1(zod@3.23.8)
     transitivePeerDependencies:
       - babel-plugin-macros
+    dev: false
+
+  /@agentic/exa@7.0.0(@agentic/core@7.0.0)(zod@3.23.8):
+    resolution: {integrity: sha512-josgPQiW1rtFlmNs//e/rgAYwMNsnj+VAcqoNLaYAyTRFk5EjUkitL/oAH8jkobPcqU7wFOxDlVWFf0+wrAPaQ==}
+    peerDependencies:
+      '@agentic/core': 7.0.0
+      zod: ^3.23.8
+    dependencies:
+      '@agentic/core': 7.0.0(zod@3.23.8)
+      ky: 1.6.0
+      zod: 3.23.8
     dev: false
 
   /@ai-sdk/openai@0.0.45(zod@3.23.8):
