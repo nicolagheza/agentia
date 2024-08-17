@@ -103,8 +103,7 @@ async function submitUserMessage(content: string) {
           )
 
           await createResource({
-            content,
-            userId
+            content
           })
 
           const toolCallId = nanoid()

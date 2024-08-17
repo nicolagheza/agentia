@@ -10,7 +10,9 @@ import { generateEmbeddings } from '../ai/embedding'
 import { embeddings as embeddingsTable } from '../db/schema/embeddings'
 import { auth } from '@/auth'
 
-export const createResource = async (input: NewResourceParams) => {
+export const createResource = async (
+  input: Omit<NewResourceParams, 'userId'>
+) => {
   try {
     const session = await auth()
     if (!session) throw new Error('Unauthorized')

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+
 import Textarea from 'react-textarea-autosize'
 
 import { useActions, useUIState } from 'ai/rsc'
@@ -17,6 +18,9 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
+import { readPdf } from '@/lib/pdf/actions'
+import { createResource } from '@/lib/resources/actions'
+import { toast } from 'sonner'
 
 export function PromptForm({
   input,
@@ -30,6 +34,45 @@ export function PromptForm({
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const { submitUserMessage } = useActions()
   const [_, setMessages] = useUIState<typeof AI>()
+  const [isCreatingPdfEmbeddings, setIsCreatingPdfEmbeddings] =
+    React.useState(false)
+
+  const handleDrop = async (event: React.DragEvent<HTMLTextAreaElement>) => {
+    event.preventDefault()
+
+    const files = event.dataTransfer.files
+    if (files.length === 0) {
+      console.error('No files were dropped.')
+      return
+    }
+
+    const file = files[0]
+    if (file.type !== 'application/pdf') {
+      console.error(file.name, 'is not a PDF file.')
+      return
+    }
+
+    const fileReader = new FileReader()
+    fileReader.onload = async () => {
+      if (fileReader.result instanceof ArrayBuffer) {
+        const uint8Array = new Uint8Array(fileReader.result)
+        const content = await readPdf(uint8Array)
+        setIsCreatingPdfEmbeddings(true)
+        toast.info('Uploading and embedding PDF...')
+        await createResource({ content })
+        setIsCreatingPdfEmbeddings(false)
+        toast.success('PDF successfully uploaded and embedded.')
+      } else {
+        console.error('FileReader result is not an ArrayBuffer.')
+      }
+    }
+
+    fileReader.readAsArrayBuffer(file)
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLTextAreaElement>) => {
+    event.preventDefault()
+  }
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -97,11 +140,17 @@ export function PromptForm({
           rows={1}
           value={input}
           onChange={e => setInput(e.target.value)}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
         />
         <div className="absolute right-0 top-[13px] sm:right-4">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button type="submit" size="icon" disabled={input === ''}>
+              <Button
+                type="submit"
+                size="icon"
+                disabled={input === '' || isCreatingPdfEmbeddings}
+              >
                 <IconArrowElbow />
                 <span className="sr-only">Send message</span>
               </Button>

@@ -9,5 +9,12 @@ module.exports = {
         pathname: '**'
       }
     ]
+  },
+
+  experimental: {
+    serverComponentsExternalPackages: ['pdf-parse'],
+    serverActions: {
+      bodySizeLimit: '4mb'
+    }
   }
 }
