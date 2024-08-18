@@ -20,8 +20,6 @@
     "db:check": "drizzle-kit check"
   },
   "dependencies": {
-    "@agentic/ai-sdk": "^7.0.0",
-    "@agentic/exa": "^7.0.0",
     "@ai-sdk/openai": "^0.0.45",
     "@auth/drizzle-adapter": "^1.4.2",
     "@radix-ui/react-alert-dialog": "^1.1.1",

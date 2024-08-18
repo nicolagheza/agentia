@@ -18,9 +18,8 @@ import { auth } from '@/auth'
 import { createResource, getUserResources } from '../resources/actions'
 import { findRelevantContent } from '@/lib/embeddings/actions'
 import { z } from 'zod'
-import { ResourcesTable } from '@/components/resources/resources-table'
+import { ResourcesTable } from '@/components/resources'
 import { ResourcesTableSkeleton } from '@/components/resources/resources-table-skeleton'
-import { ExaClient } from '@agentic/exa'
 
 const systemPrompt = `\
     You are a helpful assistant named Agentia. 
@@ -28,7 +27,12 @@ const systemPrompt = `\
     Always check your knowledge base before using the other tools.
     Explain your reasoning when providing information and don't be afraid to ask for clarification.
     if no relevant information is found in the tool calls, respond at the best of your abilities.
-    `
+
+    List of tools:
+    - createResource (content: string): add a resource to your knowledge base.
+    - getInformation (question: string): get information from your knowledge base to answer questions.
+    - getUserResources (noParam: number): get all resources of the current user in your database.
+   `
 
 async function submitUserMessage(content: string) {
   'use server'
@@ -294,94 +298,6 @@ async function submitUserMessage(content: string) {
               <ResourcesTable resources={userResources} />
             </BotCard>
           )
-        }
-      },
-      exaTool: {
-        description: 'search the internet for information',
-        parameters: z.object({
-          query: z.string().describe('the search query')
-        }),
-        generate: async function* ({ query }) {
-          yield (
-            <BotCard>
-              <BotMessage content={'🧠 Searching the internet..'} />
-            </BotCard>
-          )
-
-          const toolCallId = nanoid()
-
-          const exa = new ExaClient()
-          const searchResponse = await exa.search(query)
-
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-
-              {
-                id: nanoid(),
-                role: 'assistant',
-                content: [
-                  {
-                    type: 'tool-call',
-                    toolName: 'exaTool',
-                    toolCallId,
-                    args: { query }
-                  }
-                ]
-              },
-              {
-                id: nanoid(),
-                role: 'tool',
-                content: [
-                  {
-                    type: 'tool-result',
-                    toolName: 'exaTool',
-                    toolCallId,
-                    result: searchResponse
-                  }
-                ]
-              }
-            ]
-          })
-
-          const textResult = await streamUI({
-            model: openai('gpt-4o-mini'),
-            initial: <SpinnerMessage />,
-            system: systemPrompt,
-            messages: [...aiState.get().messages],
-            text: ({ content, done, delta }) => {
-              if (!textStream) {
-                textStream = createStreamableValue('')
-                textNode = <BotMessage content={textStream.value} />
-              }
-
-              if (done) {
-                textStream.done()
-                aiState.done({
-                  ...aiState.get(),
-                  messages: [
-                    ...aiState.get().messages,
-                    {
-                      id: nanoid(),
-                      role: 'assistant',
-                      content: [
-                        {
-                          type: 'text',
-                          text: content
-                        }
-                      ]
-                    }
-                  ]
-                })
-              } else {
-                textStream.update(delta)
-              }
-
-              return textNode
-            }
-          })
-          return <BotCard>{textResult.value}</BotCard>
         }
       }
     }
