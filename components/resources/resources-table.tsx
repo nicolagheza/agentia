@@ -33,7 +33,11 @@ export const columns: ColumnDef<Resource>[] = [
   },
   {
     accessorKey: 'content',
-    header: '📄 Content'
+    header: '📄 Content',
+    cell: ({ row }) => {
+      const content = row.original.content
+      return content.length > 50 ? `${content.substring(0, 50)}...` : content
+    }
   },
   {
     accessorKey: 'createdAt',
