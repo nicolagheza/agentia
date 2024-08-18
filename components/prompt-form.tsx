@@ -59,7 +59,7 @@ export function PromptForm({
         const content = await readPdf(uint8Array)
         setIsCreatingPdfEmbeddings(true)
         toast.info('Uploading and embedding PDF...')
-        await createResource({ content })
+        await createResource({ title: file.name, content })
         setIsCreatingPdfEmbeddings(false)
         toast.success('PDF successfully uploaded and embedded.')
       } else {

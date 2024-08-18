@@ -25,7 +25,7 @@ export const resources = pgTable('resources', {
 
 // Schema for resources - used to validate API requests
 export const insertResourceSchema = createSelectSchema(resources)
-  .extend({})
+  .extend({ title: z.string().optional() })
   .omit({
     id: true,
     createdAt: true,

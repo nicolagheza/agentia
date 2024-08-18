@@ -1,3 +1,5 @@
+'use server'
+
 import {
   NewResourceParams,
   insertResourceSchema,
@@ -9,6 +11,9 @@ import { embeddings as embeddingsTable } from '../db/schema/embeddings'
 import { auth } from '@/auth'
 import { eq } from 'drizzle-orm'
 import { Resource } from '../types'
+import { generateObject } from 'ai'
+import { z } from 'zod'
+import { openai } from '@ai-sdk/openai'
 
 export const createResource = async (
   input: Omit<NewResourceParams, 'userId'>
@@ -19,14 +24,26 @@ export const createResource = async (
     if (!session.user || !session.user.id)
       throw new Error('User or UserId missing')
 
-    const { content, userId } = insertResourceSchema.parse({
+    let _title: string | undefined
+    const { content, title, userId } = insertResourceSchema.parse({
       ...input,
       userId: session.user.id
     })
+    _title = title
+    if (!_title) {
+      const result = await generateObject({
+        model: openai('gpt-4o-mini'),
+        schema: z.object({
+          title: z.string()
+        }),
+        prompt: `Create a title for the following content:\n\n${content}`
+      })
+      _title = result.object.title
+    }
 
     const [resource] = await db
       .insert(resources)
-      .values({ content, userId })
+      .values({ content, title: _title, userId })
       .returning()
 
     const embeddings = await generateEmbeddings(content)
@@ -83,5 +100,3 @@ export const deleteResource = async (id: string) => {
       : 'Error, please try again.'
   }
 }
-
-export const maxDuration = 60

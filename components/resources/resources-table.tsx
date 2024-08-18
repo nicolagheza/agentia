@@ -28,6 +28,10 @@ type MetaType = {
 
 export const columns: ColumnDef<Resource>[] = [
   {
+    accessorKey: 'title',
+    header: '📚 Title'
+  },
+  {
     accessorKey: 'content',
     header: '📄 Content'
   },
