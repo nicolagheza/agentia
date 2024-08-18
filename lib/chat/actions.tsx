@@ -62,6 +62,13 @@ async function submitUserMessage(content: string) {
         name: message.name
       }))
     ],
+    onFinish: ({ usage }) => {
+      const { promptTokens, completionTokens, totalTokens } = usage
+      // TODO: recording usage
+      console.log('Prompt tokens:', promptTokens)
+      console.log('Completion tokens:', completionTokens)
+      console.log('Total tokens:', totalTokens)
+    },
     text: ({ content, done, delta }) => {
       if (!textStream) {
         textStream = createStreamableValue('')
@@ -239,8 +246,6 @@ async function submitUserMessage(content: string) {
           noParam: z.number().optional().default(0)
         }),
         generate: async function* ({ noParam }) {
-          console.log('noParam', noParam)
-
           yield (
             <BotCard>
               <ResourcesTableSkeleton />
