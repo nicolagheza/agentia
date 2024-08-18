@@ -2,7 +2,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DoubleArrowLeftIcon,
-  DoubleArrowRightIcon
+  DoubleArrowRightIcon,
+  ReloadIcon
 } from '@radix-ui/react-icons'
 import {
   Select,
@@ -70,6 +71,10 @@ export function DataTablePagination<TData>({
           >
             <span className="sr-only">Go to previous page</span>
             <ChevronLeftIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" className="h-8 w-8 p-0">
+            <span className="sr-only">Refresh</span>
+            <ReloadIcon className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"

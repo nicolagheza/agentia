@@ -13,7 +13,7 @@ import { BotCard, BotMessage } from '@/components/stocks'
 import { nanoid } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
-import { Chat, Message } from '@/lib/types'
+import { Chat, Message, Resource } from '@/lib/types'
 import { auth } from '@/auth'
 import { createResource, getUserResources } from '../resources/actions'
 import { findRelevantContent } from '@/lib/embeddings/actions'
@@ -387,6 +387,12 @@ export const getUIStateFromAIState = (aiState: Chat) => {
             ) : tool.toolName === 'getInformation' ? (
               <BotCard>
                 <BotMessage content={'getInformation'} />{' '}
+              </BotCard>
+            ) : tool.toolName === 'getUserResources' ? (
+              <BotCard>
+                <ResourcesTable
+                  resources={message.content[0].result as Resource[]}
+                />
               </BotCard>
             ) : null
           })
